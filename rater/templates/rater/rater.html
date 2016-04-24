@@ -1,0 +1,29 @@
+<h1>Module {{ module_id }}</h1>
+
+<form action="{% url 'rater:rate' indi.id %}" method="POST">
+	{% csrf_token %}
+	<!--{% for limit in list_limits %}
+		<input type="radio" name="limit" id="limit{{ forloop.counter }}" value="{{ limit.id }}">
+		<label for="limit{{ forloop.counter }}">{{ limit.descr }}</label>
+		<br/>
+	{% endfor %}
+	-->
+	<!-- Have to add 
+	1. class css for to look better
+	2. error message section
+	3. * red and V green for required, incl the classes
+	4. and -->
+	{% if error_msg_limits %}<p><strong>{{ error_msg_limits }}</strong></p>{% endif %}
+	<label for="limit_id">Limits: </label>
+	<select name="limit_id">
+		<option value="0" id="Limit0" selected>select limits</option>
+		{% for limit in list_limits %}
+			<option value="{{ limit.id }}" id="Limit{{ limit.id }}" 
+					{% if limit.descr == indi.limits %}selected{% endif %}>
+				{{ limit.descr }}
+			</option>
+		{% endfor %}
+	</select>
+	<br/>
+	<input type="submit" value="Rate" />
+</form>

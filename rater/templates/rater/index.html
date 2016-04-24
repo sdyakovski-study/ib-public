@@ -1,0 +1,9 @@
+{% if programs %}
+	<ul>
+		{% for program in programs %}
+		<li><a href="{% url 'rater:detail' program.module_id %}">{{ program.name }}</li>
+		{% endfor %}
+	</ul>
+{% else %}
+	<p>No programs available.</p>
+{% endif %}

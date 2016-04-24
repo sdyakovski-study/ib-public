@@ -10,10 +10,32 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
-import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+import os
+import sys
+
+#BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+# settings.py will be read and evaluated on the project level (possibly by manage.py).
+# BASE_DIR points to the '/home/sdyakovski/projects/python-projects/ib-public/project'
+# but is dealing with relative paths, not absolute paths, so its value from manage.py would be ''.
+# It simply starts with __file__ (which is settings.py); its dirname (ibpublic); and its dirname (project),
+# which is the curdir of manage.py => '' 
+
+# ADD EXTERNALS PATHS TO sys.path
+BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+# BASE_PATH is abspath of 'ibpublic/..', which is 
+# '/home/sdyakovski/projects/python-projects/ib-public/project'
+# - which is the same dir as BASE_DIR, but absolute (needed for sys.path)
+EXTERNAL_LIBS_PATH = os.path.join(BASE_PATH, 'externals', 'libs')
+EXTERNAL_APPS_PATH = os.path.join(BASE_PATH, 'externals', 'apps')
+sys.path = ['', EXTERNAL_LIBS_PATH, EXTERNAL_APPS_PATH] + sys.path[1:]
+# [1:] in order to eliminate the first element of the list (''), which is moved to the front
+
+PROJECT_PATH = os.path.abspath(os.path.dirname(__file__))
+# PROJECT_PATH is abspath of 'ibpublic', where __file__ (settings.py) is, which is 
+# '/home/sdyakovski/projects/python-projects/ib-public/project/ibpublic'
 
 
 # Quick-start development settings - unsuitable for production
@@ -31,6 +53,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'rater.apps.RaterConfig',
+    'utils.apps.UtilsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -76,8 +100,12 @@ WSGI_APPLICATION = 'ibpublic.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'limits_db_test',
+        'USER': 'ibs',
+        'PASSWORD': 'Wi3skot.',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
