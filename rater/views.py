@@ -81,10 +81,12 @@ def indication(request, indi_id, valid_on=timezone.now().date()):
             indi = form.save(commit=False)
             indi.prod_id = 400
             indi.username = 'sdyakovski'
+            indi.date_effective = valid_on # do I need to change its type, to string?
             indi.limits = form.cleaned_data['limits_id'].descr
             indi.deductible = form.cleaned_data['deductible_id'].descr
             indi.risk_experience = form.cleaned_data['risk_experience_id'].descr
             indi.sunset = form.cleaned_data['sunset_id'].descr
+            indi.classcode1 = str(form.cleaned_data['classcode1_id']) #should I use the __unicode__ or __str__ in some form. FOr the ones above too.
             indi.save()
             # redirect to a new URL:
             return HttpResponseRedirect('details/')
