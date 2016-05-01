@@ -8,7 +8,9 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
+
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
@@ -190,6 +192,12 @@ class FiZipcodes(models.Model):
         managed = False
         db_table = 'fi_zipcodes'
 
+    def __unicode__(self):
+        return '%s, %s, %s, %s, %s, %s' % (self.zipcode, self.city,	self.county, self.state,
+        	self.gl_territory, self.territory_bop)
+
+    def __str__(self):
+        return self.__unicode__()
 
 class IbModules(models.Model):
     id = models.AutoField(primary_key=True)
@@ -216,6 +224,7 @@ class IntegerRangeField(models.IntegerField):
         defaults.update(kwargs)
         return super(IntegerRangeField, self).formfield(**defaults)
 
+
 class PositiveDecimalField(models.DecimalField):
     def __init__(self, min_value=None, **kwargs):
         self.min_value = min_value
@@ -232,6 +241,7 @@ class PositiveDecimalField(models.DecimalField):
         defaults.update(kwargs)
         return super(PositiveDecimalField, self).formfield(**defaults)
 
+
 class WIthValidsForeignKey(models.ForeignKey):
     def __init__(self, *args, **kwargs):
         kwargs['on_delete'] = models.DO_NOTHING
@@ -245,11 +255,12 @@ class WIthValidsForeignKey(models.ForeignKey):
             'queryset_criteria': self.get_limit_choices_to(),
         }
 
+
 class Indications(models.Model):
     # blank=False, null=False,  are there by default. I include blank and null only where they are True
     valid_on = timezone.now().date()
     id = models.AutoField(primary_key=True)
-    prodid = models.IntegerField(editable=False)
+    prod_id = models.IntegerField(editable=False)
     username = models.CharField(max_length=32, editable=False)
     # the next one is being handled on the database level.
     #date_indicated = models.DateTimeField(blank=True, null=True, editable=False)
@@ -269,7 +280,11 @@ class Indications(models.Model):
     renewal_of = models.CharField(max_length=32, blank=True, null=True, editable=False)
 
     tzipcode = models.CharField(max_length=10,)
-    territory = models.CharField(max_length=255)
+    territory_id = WIthValidsForeignKey('RateTerritories',
+        db_column='territory_id',
+        limit_choices_to={'module_id': module_id}
+    )
+    territory = models.CharField(max_length=255, editable=False)
     limits_id = WIthValidsForeignKey('RateLimits',
         db_column='limits_id',
         limit_choices_to={'module_id': module_id}
@@ -377,9 +392,7 @@ class Indications(models.Model):
     def get_valid_queryset(cls, field_name, valid_on):
         criteria = {'valid_thru__gte': valid_on, 'valid_from__lte': valid_on}
         field = cls._meta.get_field(field_name)
-        for k,v in field.get_limit_choices_to().iteritems():
-            criteria[k] = v
-        
+        criteria.update(field.get_limit_choices_to())
         return field.rel.to.objects.filter(**criteria)
 
 
@@ -570,6 +583,12 @@ class RateTerritories(models.Model):
         db_table = 'rate_territories'
         unique_together = (('id', 'valid_from'),)
 
+    def __unicode__(self):
+        return self.descr
+
+    def __str__(self):
+        return self.__unicode__()
+
 
 class Rates(models.Model):
     id = models.AutoField(primary_key=True)
@@ -594,3 +613,30 @@ class Rates(models.Model):
         db_table = 'rates'
         unique_together = (('id', 'valid_from'),)
 
+def get_gl_territory_by_zipcode(module_id, zipcode, valid_on=timezone.now().date()):
+	try:
+		zipcode_obj = FiZipcodes.objects.get(zipcode=zipcode)
+	except FiZipcodes.DoesNotExist:
+		raise ValidationError(_('The zipcode %(value)s you provided can\'t be mapped. '
+								'Are you sure it\'s a valid Zipcode? If yes, please contact us.'),
+			code='nonexistent', params={'value': zipcode}
+		)
+	else:
+		gl_territory_code = int(zipcode_obj.gl_territory)
+		kwargs = {'module_id': module_id, 'code': gl_territory_code,
+				  'valid_from__lte': valid_on, 'valid_thru__gte': valid_on}
+		if gl_territory_code==10:
+			kwargs['descr__icontains'] = zipcode_obj.county
+		territory_obj = RateTerritories.objects.filter(**kwargs)
+
+		if not territory_obj or not territory_obj[0].eligible:
+			raise ValidationError(_('Ineligible risk!!! The zipcode %(value)s falls into '
+									'\'%(territory)s\'  which is not an eligible Territory under this program!'),
+				code='ineligible', params={'value': zipcode, 'territory': territory_obj[0]}
+			)
+		return territory_obj[0]
+
+def get_rates(valid_on=timezone.now().date(), **kwargs):
+	criteria = {'valid_thru__gte': valid_on, 'valid_from__lte': valid_on}
+	criteria.update(kwargs)
+	return Rates.objects.filter(**criteria)
