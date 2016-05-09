@@ -51,7 +51,7 @@
 	<br/>
 	
 	<div>
-		Specify the type of work
+		<label>Specify the type of work</label>
 		<br/>
 		Please specify the percentage of work done in the following areas of work. Note: The total must sum up to 100%.
 		<br/>
@@ -69,7 +69,7 @@
 	<br/>
 
 	<div>
-		Specify the field of work
+		<label>Specify the field of work</label>
 		<br/>
 		Please specify the percentage of work done in the following fields. Note: The total must sum up to 100%.
 		<table>
@@ -88,7 +88,7 @@
 	{% include "rater/render_field.html" with field=form.number_owners %}
 	<br/>
 	<div>
-		Number of Employees:
+		<label>Number of Employees:</label>
 		<br/>
 		{{ form.number_ft_employees.errors|safe }}
 		{{ form.number_pt_employees.errors|safe }}
