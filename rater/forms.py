@@ -1,4 +1,5 @@
 from django import forms
+from django.forms.utils import ErrorList
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -40,20 +41,38 @@ def validate_gt_0(value):
             _('Please make a selection')
         )
 '''
+
+class DivErrorList(ErrorList):
+	def as_divs(self):
+		if not self: return ''
+		return '<div class="errorlist"><strong>%s</strong></div>' % ''.join(['<div class="error">%s</div>' % e for e in self])
+
+	def __unicode__(self):
+		return self.as_divs()
+
+	def __str__(self):
+		return self.__unicode__()
+
+
+
 class IndicationsForm(forms.ModelForm):
+	error_css_class = 'error'
+	required_css_class = 'required'
+
 	class Meta:
 		model = Indications
-		exclude = ['id', 'renewal_of', 'territory_id']
+		exclude = ['id', 'producer_added_fee', 'renewal_of', 'territory']
 
 	def __init__(self, *args, **kwargs):
 		self.valid_on = kwargs.pop('valid_on', timezone.now().date())
+		kwargs['error_class']=DivErrorList
 		super(IndicationsForm, self).__init__(*args, **kwargs)
 
 		# setup the combo boxes
-		for field, label in [('limits_id', _('Limits')),
-							 ('deductible_id', _('Deductible')),
-							 ('risk_experience_id', _('Risk Experience')),
-							 ('sunset_id', _('Sunset'))]:
+		for field, label in [('limits', _('Limits')),
+							 ('deductible', _('Deductible')),
+							 ('risk_experience', _('Risk Experience')),
+							 ('sunset', _('Sunset'))]:
 			list_field = self.fields[field]
 			list_field.queryset = Indications.get_valid_queryset(
 									field_name=field,
@@ -62,11 +81,11 @@ class IndicationsForm(forms.ModelForm):
 			list_field.empty_label = ('Select %s') % label
 			list_field.error_messages = {'required': REQUIRED_SELECTION}
 		classcodes_queryset = Indications.get_valid_queryset(
-								field_name='classcode1_id',
+								field_name='classcode1',
 								valid_on=self.valid_on
 							  ).order_by('code')
 		for i in range(1,9):
-			list_field = self.fields['classcode%d_id' % i]
+			list_field = self.fields['classcode%d' % i]
 			list_field.queryset = classcodes_queryset
 			list_field.empty_label = ((i==1) and 
 				_('First classcode MUST be given') or _('unused'))
@@ -78,13 +97,23 @@ class IndicationsForm(forms.ModelForm):
 		# lables
 		self.fields['named'].label = _('Named Insured')
 		self.fields['tzipcode'].label = _('Risk Location Zipcode')
-		self.fields['limits_id'].label = _('Limits')
-		self.fields['deductible_id'].label = _('Deductible (per occurence)')
-		self.fields['risk_experience_id'].label = _('Risk Experience')
-		self.fields['sunset_id'].label = _('Sunset Provision')
+		self.fields['limits'].label = _('Limits')
+		self.fields['deductible'].label = _('Deductible (per occurence)')
+		self.fields['risk_experience'].label = _('Risk Experience')
+		self.fields['sunset'].label = _('Sunset Provision')
 		self.fields['subcost'].label = _('Subcontracted Cost')
 		self.fields['service_repair'].label = _('100% service/repair and/or '
 												'100% Commercial Risk')
+		self.fields['worksplit_type_groundup'].label = _('New Construction')
+		self.fields['worksplit_type_remodel'].label = _('Remodel')
+		self.fields['worksplit_type_service'].label = _('Service & Repair')
+		self.fields['worksplit_inst_commercial'].label = _('Commercial')
+		self.fields['worksplit_inst_residential'].label = _('Residential')
+		self.fields['worksplit_inst_industrial'].label = _('Industrial')
+		self.fields['worksplit_inst_institutional'].label = _('Institutional')
+		self.fields['number_owners'].label = _('Number of active owners/partners')
+		self.fields['number_ft_employees'].label = _('Full Times')
+		self.fields['number_pt_employees'].label = _('Part Times')
 		self.fields['prior_works_buyback'].label = _('Optional Prior Works '
 			'Buyback - (If the insured\'s current policy does not exclude '
 			'Prior Works you can remove the Prior Completed Operations ' 
@@ -104,6 +133,10 @@ class IndicationsForm(forms.ModelForm):
 		self.fields['sales'].help_text = _('Input the total sales/receipts.')
 		self.fields['subcost'].help_text = _('Input the total subcontracted '
 											 'cost.')
+		self.fields['number_owners'].help_text = _('Owners must be included '
+			'below at a payroll amount of $25,000 each..')
+		self.fields['prior_works_buyback'].help_text = _('If yes, please '
+			'provide us with a copy of the insured\'s current declaration page.')
 		self.fields['blanket_ai_comp_ops_endmt'].help_text = _('Note: Subject '
 			'to underwriter\'s review and approval. Please contact your '
 			'underwriter if your need an Endorsement for Residential exposure.')
@@ -164,7 +197,7 @@ class IndicationsForm(forms.ModelForm):
 			except ValidationError as e:
 				self.add_error('tzipcode', e)
 			else:
-				self.cleaned_data['territory_id'] = gl_territory_obj
+				self.cleaned_data['territory'] = gl_territory_obj
 
 		# Validate the worksplit_types - they are percentages - must sum up to 100
 		worksplit_types = ['worksplit_type_groundup',
@@ -215,7 +248,7 @@ class IndicationsForm(forms.ModelForm):
 
 		# Check the classcode payrolls
 		for i in range(1,9):
-			self.validate_classcode_payroll_pair('classcode%d_id' % i,
+			self.validate_classcode_payroll_pair('classcode%d' % i,
 												 'payroll%d' % i)
 
 		# Check for payroll to be at least PAYROLL_TOTAL_MIN_LIMIT
@@ -233,18 +266,18 @@ class IndicationsForm(forms.ModelForm):
 		# Check if 91342 is there
 		has_91342 = False
 		for i in range(1,9):
-			classcode_id = self.cleaned_data.get('classcode%d_id' % i)
-			if classcode_id and classcode_id.code == '91342':
+			classcode = self.cleaned_data.get('classcode%d' % i)
+			if classcode and classcode.code == '91342':
 				has_91342 = True
 
 		# Classcodes 94007 and 95410 are only available if 91342 is selected
 		if not has_91342:
 			for i in range(1,9):
-				classcode_id = self.cleaned_data.get('classcode%d_id' % i)
-				if classcode_id and classcode_id.code in ('94007','95410'):
+				classcode = self.cleaned_data.get('classcode%d' % i)
+				if classcode and classcode.code in ('94007','95410'):
 					msg = _('Classcodes 94007 and 95410 are only available '
 							'if 91342 is selected')
-					self.add_error('classcode%d_id' % i, msg)
+					self.add_error('classcode%d' % i, msg)
 
 		# Check if service_repair is selected, but types of work do not support it.
 		if self.cleaned_data.get('service_repair'):
@@ -270,6 +303,7 @@ class IndicationsForm(forms.ModelForm):
 	    			'been indicated!')
 			self.add_error('blanket_ai_comp_ops_endmt', msg)
 
+		# Check if the payroll corresponds to the number of owners
 		if self.cleaned_data.has_key('number_owners'):
 			number_owners = self.cleaned_data.get('number_owners')
 			if total_payroll < number_owners * PAYROLL_TOTAL_MIN_LIMIT:
@@ -278,19 +312,19 @@ class IndicationsForm(forms.ModelForm):
                 		'owners' % (number_owners, number_owners))
 				self.add_error('number_owners', msg)
 
-	def validate_classcode_payroll_pair(self, classcode_id_field, payroll_field):
-		if (self.cleaned_data.has_key(classcode_id_field) and 
+	def validate_classcode_payroll_pair(self, classcode_field, payroll_field):
+		if (self.cleaned_data.has_key(classcode_field) and 
 			self.cleaned_data.has_key(payroll_field)):
 
-			classcode_id, payroll = (self.cleaned_data.get(classcode_id_field),
+			classcode, payroll = (self.cleaned_data.get(classcode_field),
 									 self.cleaned_data.get(payroll_field))
-			if classcode_id and not payroll:
+			if classcode and not payroll:
 				self.add_error(payroll_field,
 							   ValidationError(_('You need to input the '
 												 'payroll for this classcode!'),
 											   code='incomplete_payroll'))
-			if not classcode_id and payroll:
-				self.add_error(classcode_id_field,
+			if not classcode and payroll:
+				self.add_error(classcode_field,
 							   ValidationError(_('You need to choose a '
 							   					 'classcode if there is a '
 							   					 'payroll for it!'),

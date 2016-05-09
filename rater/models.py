@@ -280,31 +280,31 @@ class Indications(models.Model):
     renewal_of = models.CharField(max_length=32, blank=True, null=True, editable=False)
 
     tzipcode = models.CharField(max_length=10,)
-    territory_id = WIthValidsForeignKey('RateTerritories',
+    territory = WIthValidsForeignKey('RateTerritories',
         db_column='territory_id',
         limit_choices_to={'module_id': module_id}
     )
-    territory = models.CharField(max_length=255, editable=False)
-    limits_id = WIthValidsForeignKey('RateLimits',
+    territory_descr = models.CharField(max_length=255, editable=False)
+    limits = WIthValidsForeignKey('RateLimits',
         db_column='limits_id',
         limit_choices_to={'module_id': module_id}
     )
-    limits = models.CharField(max_length=255, editable=False)
-    deductible_id = WIthValidsForeignKey('RateDeductibles',
+    limits_descr = models.CharField(max_length=255, editable=False)
+    deductible = WIthValidsForeignKey('RateDeductibles',
         db_column='deductible_id',
         limit_choices_to={'module_id': module_id}
     )
-    deductible = models.CharField(max_length=255, editable=False)
-    risk_experience_id = WIthValidsForeignKey('RateFactors',
+    deductible_descr = models.CharField(max_length=255, editable=False)
+    risk_experience = WIthValidsForeignKey('RateFactors',
         db_column='risk_experience_id',
         limit_choices_to={'module_id': module_id, 'parameter_set': 'risk_experience'}
     )
-    risk_experience = models.CharField(max_length=255, editable=False)
-    sunset_id = WIthValidsForeignKey('RateFactors',
+    risk_experience_descr = models.CharField(max_length=255, editable=False)
+    sunset = WIthValidsForeignKey('RateFactors',
         db_column='sunset_id',
         limit_choices_to={'module_id': module_id, 'parameter_set': 'sunset'}
     )
-    sunset = models.CharField(max_length=255, editable=False)
+    sunset_descr = models.CharField(max_length=255, editable=False)
 
     sales = PositiveDecimalField(min_value=0, max_digits=20, decimal_places=2, default=0)
     subcost = PositiveDecimalField(min_value=0, max_digits=20, decimal_places=2, default=0)
@@ -323,59 +323,59 @@ class Indications(models.Model):
     number_ft_employees = IntegerRangeField(min_value=0, default=0)
     number_pt_employees = IntegerRangeField(min_value=0, default=0)
 
-    classcode1_id = WIthValidsForeignKey('RateClasscodes',
+    classcode1 = WIthValidsForeignKey('RateClasscodes',
         db_column='classcode1_id',
         limit_choices_to={'module_id': module_id})
-    classcode1 = models.CharField(max_length=255, editable=False)
+    classcode1_descr = models.CharField(max_length=255, editable=False)
     payroll1 = PositiveDecimalField(min_value=0, max_digits=20, decimal_places=2, default=0)
-    classcode2_id = WIthValidsForeignKey('RateClasscodes',
+    classcode2 = WIthValidsForeignKey('RateClasscodes',
         db_column='classcode2_id',
         limit_choices_to={'module_id': module_id},
         default=0
     )
-    classcode2 = models.CharField(max_length=255, editable=False)
+    classcode2_descr = models.CharField(max_length=255, editable=False)
     payroll2 = PositiveDecimalField(min_value=0, max_digits=20, decimal_places=2, default=0)
-    classcode3_id = WIthValidsForeignKey('RateClasscodes',
+    classcode3 = WIthValidsForeignKey('RateClasscodes',
         db_column='classcode3_id',
         limit_choices_to={'module_id': module_id},
         default=0
     )
-    classcode3 = models.CharField(max_length=255, editable=False)
+    classcode3_descr = models.CharField(max_length=255, editable=False)
     payroll3 = PositiveDecimalField(min_value=0, max_digits=20, decimal_places=2, default=0)
-    classcode4_id = WIthValidsForeignKey('RateClasscodes',
+    classcode4 = WIthValidsForeignKey('RateClasscodes',
         db_column='classcode4_id',
         limit_choices_to={'module_id': module_id},
         default=0
     )
-    classcode4 = models.CharField(max_length=255, editable=False)
+    classcode4_descr = models.CharField(max_length=255, editable=False)
     payroll4 = PositiveDecimalField(min_value=0, max_digits=20, decimal_places=2, default=0)
-    classcode5_id = WIthValidsForeignKey('RateClasscodes',
+    classcode5 = WIthValidsForeignKey('RateClasscodes',
         db_column='classcode5_id',
         limit_choices_to={'module_id': module_id},
         default=0
     )
-    classcode5 = models.CharField(max_length=255, editable=False)
+    classcode5_descr = models.CharField(max_length=255, editable=False)
     payroll5 = PositiveDecimalField(min_value=0, max_digits=20, decimal_places=2, default=0)
-    classcode6_id = WIthValidsForeignKey('RateClasscodes',
+    classcode6 = WIthValidsForeignKey('RateClasscodes',
         db_column='classcode6_id',
         limit_choices_to={'module_id': module_id},
         default=0
     )
-    classcode6 = models.CharField(max_length=255, editable=False)
+    classcode6_descr = models.CharField(max_length=255, editable=False)
     payroll6 = PositiveDecimalField(min_value=0, max_digits=20, decimal_places=2, default=0)
-    classcode7_id = WIthValidsForeignKey('RateClasscodes',
+    classcode7 = WIthValidsForeignKey('RateClasscodes',
         db_column='classcode7_id',
         limit_choices_to={'module_id': module_id},
         default=0
     )
-    classcode7 = models.CharField(max_length=255, editable=False)
+    classcode7_descr = models.CharField(max_length=255, editable=False)
     payroll7 = PositiveDecimalField(min_value=0, max_digits=20, decimal_places=2, default=0)
-    classcode8_id = WIthValidsForeignKey('RateClasscodes',
+    classcode8 = WIthValidsForeignKey('RateClasscodes',
         db_column='classcode8_id',
         limit_choices_to={'module_id': module_id},
         default=0
     )
-    classcode8 = models.CharField(max_length=255, editable=False)
+    classcode8_descr = models.CharField(max_length=255, editable=False)
     payroll8 = PositiveDecimalField(min_value=0, max_digits=20, decimal_places=2, default=0)
 
     prior_works_buyback = models.BooleanField(default=False)
@@ -636,7 +636,25 @@ def get_gl_territory_by_zipcode(module_id, zipcode, valid_on=timezone.now().date
 			)
 		return territory_obj[0]
 
+def get_hangl_rates(classcode, territory, limits, valid_on=timezone.now().date()):
+	print 'classcode.code %s' % classcode.code
+	print 'int(territory.code) %s' % int(territory.code)
+	print 'limits.id %s' % limits.id
+	criteria = {'classcode': classcode.code, 'territory': int(territory.code), 'limit1': limits.id}
+	try:
+		rates = get_rates(valid_on=valid_on, **criteria)
+	except Rates.DoesNotExist:
+		raise ValidationError(_('The rates are not setup for a risk with classcode %(classcode)s, '
+								'territory %(territory)s and limits %(limit)s. Please contact us.'), 
+							  code='nonexistent', 
+							  params={'classcode': classcode.code,
+					  				  'territory': str(territory),
+					  				  'limit': str(limits)
+					  				 })
+	else:
+		return rates
+
 def get_rates(valid_on=timezone.now().date(), **kwargs):
 	criteria = {'valid_thru__gte': valid_on, 'valid_from__lte': valid_on}
 	criteria.update(kwargs)
-	return Rates.objects.filter(**criteria)
+	return Rates.objects.get(**criteria)

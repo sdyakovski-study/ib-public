@@ -1,10 +1,11 @@
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from .apps import module_id
 from .forms import IndicationsForm
-from .models import RateLimits, Indications, get_rates
+from .models import RateLimits, Indications, get_hangl_rates
 
 
 #temporary structure
@@ -83,32 +84,32 @@ def indication(request, indi_id, valid_on=timezone.now().date()):
 			indi.prod_id = 400
 			indi.username = 'sdyakovski'
 			indi.date_effective = valid_on
-			indi.territory_id = form.cleaned_data['territory_id']
-			indi.territory = str(form.cleaned_data['territory_id'])
-			indi.limits = str(form.cleaned_data['limits_id'])
-			indi.deductible = str(form.cleaned_data['deductible_id'])
-			indi.risk_experience = str(form.cleaned_data['risk_experience_id'])
-			indi.sunset = str(form.cleaned_data['sunset_id'])
-			indi.classcode1 = str(form.cleaned_data['classcode1_id'])
-			if form.cleaned_data['classcode2_id']:
-				indi.classcode2 = str(form.cleaned_data['classcode2_id'])
-			if form.cleaned_data['classcode3_id']:
-				indi.classcode3 = str(form.cleaned_data['classcode3_id'])
-			if form.cleaned_data['classcode4_id']:
-				indi.classcode4 = str(form.cleaned_data['classcode4_id'])
-			if form.cleaned_data['classcode5_id']:
-				indi.classcode5 = str(form.cleaned_data['classcode5_id'])
-			if form.cleaned_data['classcode6_id']:
-				indi.classcode6 = str(form.cleaned_data['classcode6_id'])
-			if form.cleaned_data['classcode7_id']:
-				indi.classcode7 = str(form.cleaned_data['classcode7_id'])
-			if form.cleaned_data['classcode8_id']:
-				indi.classcode8 = str(form.cleaned_data['classcode8_id'])
+			indi.territory = form.cleaned_data['territory']
+			indi.territory_descr = str(form.cleaned_data['territory'])
+			indi.limits_descr = str(form.cleaned_data['limits'])
+			indi.deductible_descr = str(form.cleaned_data['deductible'])
+			indi.risk_experience_descr = str(form.cleaned_data['risk_experience'])
+			indi.sunset_descr = str(form.cleaned_data['sunset'])
+			indi.classcode1_descr = str(form.cleaned_data['classcode1'])
+			if form.cleaned_data['classcode2']:
+				indi.classcode2_descr = str(form.cleaned_data['classcode2'])
+			if form.cleaned_data['classcode3']:
+				indi.classcode3_descr = str(form.cleaned_data['classcode3'])
+			if form.cleaned_data['classcode4']:
+				indi.classcode4_descr = str(form.cleaned_data['classcode4'])
+			if form.cleaned_data['classcode5']:
+				indi.classcode5_descr = str(form.cleaned_data['classcode5'])
+			if form.cleaned_data['classcode6']:
+				indi.classcode6_descr = str(form.cleaned_data['classcode6'])
+			if form.cleaned_data['classcode7']:
+				indi.classcode7_descr = str(form.cleaned_data['classcode7'])
+			if form.cleaned_data['classcode8']:
+				indi.classcode8_descr = str(form.cleaned_data['classcode8'])
 
 			#calculate the combined rate_factor over all the parameters
-			deduct_factor = form.cleaned_data['deductible_id'].rate_factor
-			sunset_factor = form.cleaned_data['sunset_id'].factor
-			riskex_factor = form.cleaned_data['risk_experience_id'].factor
+			deduct_factor = float(form.cleaned_data['deductible'].rate_factor)
+			riskex_factor = float(form.cleaned_data['risk_experience'].factor)
+			sunset_factor = float(form.cleaned_data['sunset'].factor)
 			serrep_factor = form.cleaned_data['service_repair'] and 0.75 or 1.0
 			pw_bb_factor = form.cleaned_data['prior_works_buyback'] and 1.25 or 1.0
 			al_bb_factor = form.cleaned_data['absolute_limits_buyback'] and 1.10 or 1.0
@@ -117,17 +118,20 @@ def indication(request, indi_id, valid_on=timezone.now().date()):
 			premium=0.0
 			min_premium=0.00
 
-			print 'indi.limits_id.id %s' % indi.limits_id.id
-
+			# Get the classcode baserate and finalrate
 			try:
-				rates = get_rates(valid_on=valid_on, classcode=indi.classcode1_id.code, territory=int(indi.territory_id.code), limit1=indi.limits_id.id)
-			except DoesNotExist:
-				raise ValidationError(_('The rates are not setup for a risk with classcode %(classcode)s, '
-										'territory %(territory)s and limits %(limit)s. Please contact us.'), 
-									  code='nonexistent', 
-									  params={'classcode': indi.classcode1_id.code,
-							  				  'territory': int(indi.territory_id.code),
-							  				  'limit': indi.limits_id})
+				rates = get_hangl_rates(classcode=indi.classcode1, territory=indi.territory, limits=indi.limits, valid_on=valid_on)
+			except ValidationError as e:
+				raise Http404(e)
+			baserate = float(rates.rate1)
+			print 'rates.rate1 %s' % baserate
+			finalrate = baserate * deduct_factor * sunset_factor * riskex_factor * serrep_factor * pw_bb_factor * al_bb_factor
+			print 'finalrate %s' % finalrate
+			# let's do the math
+			premium = float(indi.payroll1/1000) * finalrate
+			print 'premium %s' % premium
+			indi.premium = premium
+
 
 			"""
 			# first classcode
@@ -139,7 +143,7 @@ def indication(request, indi_id, valid_on=timezone.now().date()):
 			"""
 			indi.save()
 			# redirect to a new URL:
-			return HttpResponseRedirect('details/')
+			return render(request, 'rater/results.html', {'indi': indi})
 
 	else:
 		if indi_id == '0':
@@ -147,7 +151,7 @@ def indication(request, indi_id, valid_on=timezone.now().date()):
 		else:
 			form = IndicationsForm(instance=Indications.objects.get(id=indi_id), valid_on=valid_on)
 
-	return render(request, 'rater/indication.html', {'form': form})
+	return render(request, 'rater/indication.html', {'form': form, 'indi_id': indi_id})
 
 
 

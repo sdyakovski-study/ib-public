@@ -1,11 +1,132 @@
+{% extends "rater/base.html" %}
 
-<h1>Indication</h1>
+{% block head_title %}Indication | {{ block.super }}{% endblock %}
+
+{% block content %}
+<h1>
+	{% if indi_id == '0' %}
+		New Indication
+	{% else %}
+		Edit Indication {{ indi_id }}
+	{% endif %}
+</h1>
+
 <form method='POST' action=''>{% csrf_token %}
 	{% for hidden in form.hidden_fields %}
 	    {{ hidden }}
 	{% endfor %}
-	<table>
-		{{ form.as_table }}
-	</table>
+
+	{{ form.non_field_errors }}
+
+	{% include "rater/render_field.html" with field=form.named %}
+	<br/>
+	{% include "rater/render_field.html" with field=form.dba %}
+	<br/>
+	{% include "rater/render_field.html" with field=form.street %}
+	<br/>
+	<div class="fieldWrapper">
+		{{ form.city.errors|safe }}
+		{{ form.state.errors|safe }}
+		{{ form.zipcode.errors|safe }}
+		{{ form.city.label_tag }}/{{ form.state.label_tag }}/{{ form.zipcode.label_tag }}
+		<br/>
+		{{ form.city }} {{ form.state }} {{ form.zipcode }}
+	</div>
+	<br/>
+	{% include "rater/render_field.html" with field=form.tzipcode %}
+	<br/>
+	{% include "rater/render_field.html" with field=form.limits %}
+	<br/>
+	{% include "rater/render_field.html" with field=form.deductible %}
+	<br/>
+	{% include "rater/render_field.html" with field=form.risk_experience %}
+	<br/>
+	{% include "rater/render_field.html" with field=form.sunset %}
+	<br/>
+	{% include "rater/render_field.html" with field=form.sales %}
+	<br/>
+	{% include "rater/render_field.html" with field=form.subcost %}
+	<br/>
+	{% include "rater/render_field.html" with field=form.service_repair %}
+	<br/>
+	
+	<div>
+		Specify the type of work
+		<br/>
+		Please specify the percentage of work done in the following areas of work. Note: The total must sum up to 100%.
+		<br/>
+		No New Ground up Construction is allowed if the applicant is acting in the capacity of a General Contractor. New Construction as a sub/trade contractor is acceptable.
+		<table>
+			<thead>
+				<th>Type of work</th>
+				<th>Percentage of work done</th>
+			</thead>
+		</table>
+		{% include "rater/render_work_classification.html" with field=form.worksplit_type_groundup %}
+		{% include "rater/render_work_classification.html" with field=form.worksplit_type_remodel %}
+		{% include "rater/render_work_classification.html" with field=form.worksplit_type_service %}
+	</div>
+	<br/>
+
+	<div>
+		Specify the field of work
+		<br/>
+		Please specify the percentage of work done in the following fields. Note: The total must sum up to 100%.
+		<table>
+			<thead>
+				<th>Field of work</th>
+				<th>Percentage of work done</th>
+			</thead>
+		</table>
+		{% include "rater/render_work_classification.html" with field=form.worksplit_inst_commercial %}
+		{% include "rater/render_work_classification.html" with field=form.worksplit_inst_residential %}
+		{% include "rater/render_work_classification.html" with field=form.worksplit_inst_industrial %}
+		{% include "rater/render_work_classification.html" with field=form.worksplit_inst_institutional %}
+	</div>
+	<br/>
+
+	{% include "rater/render_field.html" with field=form.number_owners %}
+	<br/>
+	<div>
+		Number of Employees:
+		<br/>
+		{{ form.number_ft_employees.errors|safe }}
+		{{ form.number_pt_employees.errors|safe }}
+		{{ form.number_ft_employees }} Full Times
+		{{ form.number_pt_employees }} Part Times
+	</div>
+	<br/>
+
+	<div>
+		<table>
+			<thead>
+				<th>Classcode</th>
+				<th>Payroll</th>
+			</thead>
+		</table>
+		Note: Classifications that are not listed below are unacceptable risks for this program. Please contact your underwriter if your risk requires different classification.
+		{% include "rater/render_classcode_payroll.html" with classcode=form.classcode1 payroll=form.payroll1 %}
+		{% include "rater/render_classcode_payroll.html" with classcode=form.classcode2 payroll=form.payroll2 %}
+		{% include "rater/render_classcode_payroll.html" with classcode=form.classcode3 payroll=form.payroll3 %}
+		{% include "rater/render_classcode_payroll.html" with classcode=form.classcode4 payroll=form.payroll4 %}
+		{% include "rater/render_classcode_payroll.html" with classcode=form.classcode5 payroll=form.payroll5 %}
+		{% include "rater/render_classcode_payroll.html" with classcode=form.classcode6 payroll=form.payroll6 %}
+		{% include "rater/render_classcode_payroll.html" with classcode=form.classcode7 payroll=form.payroll7 %}
+		{% include "rater/render_classcode_payroll.html" with classcode=form.classcode8 payroll=form.payroll8 %}
+	</div>
+	<br/>
+
+	{% include "rater/render_field.html" with field=form.prior_works_buyback %}
+	<br/>
+	{% include "rater/render_field.html" with field=form.terrorism %}
+	<br/>
+	{% include "rater/render_field.html" with field=form.agg_lim_endmt %}
+	<br/>
+	{% include "rater/render_field.html" with field=form.absolute_limits_buyback %}
+	<br/>
+	{% include "rater/render_field.html" with field=form.blanket_ai_comp_ops_endmt %}
+	<br/>
+
 	<input type='submit'/>
 </form>
+{% endblock content %}

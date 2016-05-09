@@ -1,3 +1,4 @@
+<!--
 <h1>{{ module_id }}</h1>
 
 {% if error_msg_limits %}<p><strong>{{ error_msg_limits }}</strong></p>{% endif %}
@@ -7,5 +8,19 @@
     <tr><td>{{ limit.limit1 }}, {{ limit.limit2 }}, {{ limit.limit3 }}</td></tr>  
     <tr><td>{{ limit.limit4 }}, {{ limit.limit5 }}, {{ limit.limit6 }}</td></tr>
 </table>
+-->
+{% load humanize %}
 
-<a href="{% url 'rater:rater' indi.id %}">Want to rate again?</a>
+{{ indi.named }}
+<br>
+{{ indi.limits_descr }}
+<br>
+{{ indi.territory_descr }}
+<br>
+{{ indi.classcode1_descr }}
+<br>
+{{ indi.premium1|floatformat:2|intcomma }}
+<br>
+
+
+<a href="{% url 'rater:indication' indi.id %}">Want to rate again?</a>
