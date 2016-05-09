@@ -1,4 +1,4 @@
-<div class="fieldWrapper">
+<!--<div class="fieldWrapper">
 	{{ field.errors|safe }}
 	{{ field.label_tag }}
 	<br>
@@ -7,4 +7,20 @@
 		<br>
 	{% endif %}
 	{{ field }}
+</div>
+-->
+{% if field.errors %}
+<div class="alert alert-danger" role="alert">
+	<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+	<span class="sr-only">Error:</span>
+	{{ field.errors|safe }}
+{% else %}
+<div class="form-group">
+{% endif %}
+	{{ field.label_tag }}
+	<br>
+	{{ field }}
+	{% if field.help_text %}
+		<span class="help-block">{{ field.help_text }}</span>
+	{% endif %}
 </div>

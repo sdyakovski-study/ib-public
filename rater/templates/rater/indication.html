@@ -3,13 +3,21 @@
 {% block head_title %}Indication | {{ block.super }}{% endblock %}
 
 {% block content %}
-<h1>
-	{% if indi_id == '0' %}
-		New Indication
-	{% else %}
-		Edit Indication {{ indi_id }}
-	{% endif %}
-</h1>
+<ol class="breadcrumb">
+  <li><a href="#">Home</a></li>
+  <li><a href="#">Rater</a></li>
+  <li class="active">Indication</li>
+</ol>
+
+<div class="page-header">
+	<h1>
+		{% if indi_id == '0' %}
+			New Indication
+		{% else %}
+			Edit Indication {{ indi_id }}
+		{% endif %}
+	</h1>
+</div>
 
 <form method='POST' action=''>{% csrf_token %}
 	{% for hidden in form.hidden_fields %}
@@ -52,10 +60,8 @@
 	
 	<div>
 		<label>Specify the type of work</label>
-		<br/>
-		Please specify the percentage of work done in the following areas of work. Note: The total must sum up to 100%.
-		<br/>
-		No New Ground up Construction is allowed if the applicant is acting in the capacity of a General Contractor. New Construction as a sub/trade contractor is acceptable.
+		<span class="help-block">Please specify the percentage of work done in the following areas of work. Note: The total must sum up to 100%.</span>
+		<span class="help-block"><h6><strong>No New Ground up Construction is allowed if the applicant is acting in the capacity of a General Contractor. New Construction as a sub/trade contractor is acceptable.</strong></h6></span>
 		<table>
 			<thead>
 				<th>Type of work</th>
@@ -70,8 +76,7 @@
 
 	<div>
 		<label>Specify the field of work</label>
-		<br/>
-		Please specify the percentage of work done in the following fields. Note: The total must sum up to 100%.
+		<span class="help-block">Please specify the percentage of work done in the following fields. Note: The total must sum up to 100%.</span>
 		<table>
 			<thead>
 				<th>Field of work</th>

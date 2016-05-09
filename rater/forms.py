@@ -46,6 +46,7 @@ class DivErrorList(ErrorList):
 	def as_divs(self):
 		if not self: return ''
 		return '<div class="errorlist"><strong>%s</strong></div>' % ''.join(['<div class="error">%s</div>' % e for e in self])
+		#return '<strong>%s</strong>' % ''.join(['<div class="error">%s</div>' % e for e in self])
 
 	def __unicode__(self):
 		return self.as_divs()

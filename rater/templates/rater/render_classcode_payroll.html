@@ -1,8 +1,16 @@
-{{ classcode.errors|safe }}
-{{ payroll.errors|safe }}
+{% if classcode.errors or payroll.errors %}
+<div class="alert alert-danger" role="alert">
+	<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+	<span class="sr-only">Error:</span>
+	{{ classcode.errors|safe }}
+	{{ payroll.errors|safe }}
+{% else %}
+<div>
+{% endif %}
 <table>
 	<tr>
 		<td>{{ classcode }}</td>
 		<td>{{ payroll }}</td>
 	</tr>
 </table>
+</div>

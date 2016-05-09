@@ -1,7 +1,15 @@
-{{ field.errors|safe }}
-<table>
-	<tr>
-		<td>{{ field.label }}</td>
-		<td>{{ field }}</td>
-	</tr>
-</table>
+{% if field.errors %}
+<div class="alert alert-danger" role="alert">
+	<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+	<span class="sr-only">Error:</span>
+	{{ field.errors|safe }}
+{% else %}
+<div>
+{% endif %}
+	<table>
+		<tr>
+			<td>{{ field.label }}</td>
+			<td>{{ field }}</td>
+		</tr>
+	</table>
+</div>
