@@ -6,10 +6,6 @@
 {% else %}
 <div>
 {% endif %}
-	<table>
-		<tr>
-			<td>{{ field.label }}</td>
-			<td>{{ field }}</td>
-		</tr>
-	</table>
+	<div class="col-md-4">{{ field.label }}</div>
+	<div class="col-md-8">{{ field }}</div>
 </div>

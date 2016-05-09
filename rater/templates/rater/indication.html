@@ -27,12 +27,9 @@
 	{{ form.non_field_errors }}
 
 	{% include "rater/render_field.html" with field=form.named %}
-	<br/>
 	{% include "rater/render_field.html" with field=form.dba %}
-	<br/>
 	{% include "rater/render_field.html" with field=form.street %}
-	<br/>
-	<div class="fieldWrapper">
+	<div class="form-group">
 		{{ form.city.errors|safe }}
 		{{ form.state.errors|safe }}
 		{{ form.zipcode.errors|safe }}
@@ -40,49 +37,34 @@
 		<br/>
 		{{ form.city }} {{ form.state }} {{ form.zipcode }}
 	</div>
-	<br/>
 	{% include "rater/render_field.html" with field=form.tzipcode %}
-	<br/>
 	{% include "rater/render_field.html" with field=form.limits %}
-	<br/>
 	{% include "rater/render_field.html" with field=form.deductible %}
-	<br/>
 	{% include "rater/render_field.html" with field=form.risk_experience %}
-	<br/>
 	{% include "rater/render_field.html" with field=form.sunset %}
-	<br/>
 	{% include "rater/render_field.html" with field=form.sales %}
-	<br/>
 	{% include "rater/render_field.html" with field=form.subcost %}
-	<br/>
 	{% include "rater/render_field.html" with field=form.service_repair %}
-	<br/>
 	
-	<div>
-		<label>Specify the type of work</label>
-		<span class="help-block">Please specify the percentage of work done in the following areas of work. Note: The total must sum up to 100%.</span>
-		<span class="help-block"><h6><strong>No New Ground up Construction is allowed if the applicant is acting in the capacity of a General Contractor. New Construction as a sub/trade contractor is acceptable.</strong></h6></span>
-		<table>
-			<thead>
-				<th>Type of work</th>
-				<th>Percentage of work done</th>
-			</thead>
-		</table>
+	<div class="row">
+		<label class="col-md-12">Specify the type of work</label>
+		<span class="help-block col-md-12">Please specify the percentage of work done in the following areas of work. <strong>Note:</strong> 
+			The total <strong>must</strong> sum up to 100%.<h6><strong>No New Ground up Construction is allowed if the applicant is acting 
+			in the capacity of a General Contractor. New Construction as a sub/trade contractor is acceptable.</strong></h6></span>
+		<label class="col-md-4">Type of work</label>
+		<label class="col-md-8">Percentage of work done</label>
 		{% include "rater/render_work_classification.html" with field=form.worksplit_type_groundup %}
 		{% include "rater/render_work_classification.html" with field=form.worksplit_type_remodel %}
 		{% include "rater/render_work_classification.html" with field=form.worksplit_type_service %}
 	</div>
 	<br/>
 
-	<div>
-		<label>Specify the field of work</label>
-		<span class="help-block">Please specify the percentage of work done in the following fields. Note: The total must sum up to 100%.</span>
-		<table>
-			<thead>
-				<th>Field of work</th>
-				<th>Percentage of work done</th>
-			</thead>
-		</table>
+	<div class="row">
+		<label class="col-md-12">Specify the field of work</label>
+		<span class="help-block col-md-12">Please specify the percentage of work done in the above fields. <strong>Note:</strong>
+			The total <strong>must</strong> sum up to 100%.</span>
+		<label class="col-md-4">Field of work</label>
+		<label class="col-md-8">Percentage of work done</label>
 		{% include "rater/render_work_classification.html" with field=form.worksplit_inst_commercial %}
 		{% include "rater/render_work_classification.html" with field=form.worksplit_inst_residential %}
 		{% include "rater/render_work_classification.html" with field=form.worksplit_inst_industrial %}
@@ -91,25 +73,30 @@
 	<br/>
 
 	{% include "rater/render_field.html" with field=form.number_owners %}
-	<br/>
-	<div>
-		<label>Number of Employees:</label>
-		<br/>
+
+	{% if form.number_ft_employees.errors or form.number_pt_employees.errors %}
+	<div class="alert alert-danger" role="alert">
+		<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+		<span class="sr-only">Error:</span>
 		{{ form.number_ft_employees.errors|safe }}
 		{{ form.number_pt_employees.errors|safe }}
-		{{ form.number_ft_employees }} Full Times
-		{{ form.number_pt_employees }} Part Times
+	{% else %}
+	<div class="row">
+	{% endif %}
+		<label class="col-md-12">Number of Employees:</label>
+		<div class="col-md-4">{{ form.number_ft_employees }} Full Times</div>
+		<div class="col-md-8">{{ form.number_pt_employees }} Part Times</div>
 	</div>
 	<br/>
 
-	<div>
-		<table>
-			<thead>
-				<th>Classcode</th>
-				<th>Payroll</th>
-			</thead>
-		</table>
-		Note: Classifications that are not listed below are unacceptable risks for this program. Please contact your underwriter if your risk requires different classification.
+	<div class="row">
+		<label class="col-md-4">Classcode</label>
+		<label class="col-md-8">Payroll</label>
+		<br/>
+		<span class="help-block col-md-12">
+			<strong>Note:</strong> Classifications that are not listed below are unacceptable risks for this program. Please contact 
+			your underwriter if your risk requires different classification.
+		</span>
 		{% include "rater/render_classcode_payroll.html" with classcode=form.classcode1 payroll=form.payroll1 %}
 		{% include "rater/render_classcode_payroll.html" with classcode=form.classcode2 payroll=form.payroll2 %}
 		{% include "rater/render_classcode_payroll.html" with classcode=form.classcode3 payroll=form.payroll3 %}
@@ -122,15 +109,10 @@
 	<br/>
 
 	{% include "rater/render_field.html" with field=form.prior_works_buyback %}
-	<br/>
 	{% include "rater/render_field.html" with field=form.terrorism %}
-	<br/>
 	{% include "rater/render_field.html" with field=form.agg_lim_endmt %}
-	<br/>
 	{% include "rater/render_field.html" with field=form.absolute_limits_buyback %}
-	<br/>
 	{% include "rater/render_field.html" with field=form.blanket_ai_comp_ops_endmt %}
-	<br/>
 
 	<input type='submit'/>
 </form>
