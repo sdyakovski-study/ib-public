@@ -14,6 +14,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
+from localflavor.us.models import USZipCodeField
+
 from .apps import module_id
 
 
@@ -271,15 +273,15 @@ class Indications(models.Model):
     dba = models.CharField(max_length=255, blank=True, null=True)
     street = models.CharField(max_length=255, blank=True, null=True)
     city = models.CharField(max_length=255, blank=True, null=True)
-    state = models.CharField(max_length=32, blank=True, null=True)
-    zipcode = models.CharField(max_length=10, blank=True, null=True)
+    state = models.CharField(max_length=32, blank=True, null=True, default='CA')
+    zipcode = USZipCodeField(max_length=10, blank=True, null=True)
 
     premium = models.DecimalField(max_digits=20, decimal_places=2, editable=False)
     min_premium = models.BooleanField(editable=False)
     producer_added_fee = PositiveDecimalField(min_value=0, max_digits=20, decimal_places=2, default=0)
     renewal_of = models.CharField(max_length=32, blank=True, null=True, editable=False)
 
-    tzipcode = models.CharField(max_length=10,)
+    tzipcode = USZipCodeField(max_length=10,)
     territory = WIthValidsForeignKey('RateTerritories',
         db_column='territory_id',
         limit_choices_to={'module_id': module_id}

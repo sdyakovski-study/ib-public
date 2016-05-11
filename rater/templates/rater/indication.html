@@ -29,14 +29,22 @@
 	{% include "rater/render_field.html" with field=form.named %}
 	{% include "rater/render_field.html" with field=form.dba %}
 	{% include "rater/render_field.html" with field=form.street %}
-	<div class="form-group">
+
+	{% if form.city.errors or form.state.errors or form.zipcode.errors %}
+	<div class="alert alert-danger" role="alert">
 		{{ form.city.errors|safe }}
 		{{ form.state.errors|safe }}
 		{{ form.zipcode.errors|safe }}
+		<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+		<span class="sr-only">Error:</span>
+	{% else %}
+	<div class="form-group">
+	{% endif %}
 		{{ form.city.label_tag }}/{{ form.state.label_tag }}/{{ form.zipcode.label_tag }}
 		<br/>
 		{{ form.city }} {{ form.state }} {{ form.zipcode }}
 	</div>
+
 	{% include "rater/render_field.html" with field=form.tzipcode %}
 	{% include "rater/render_field.html" with field=form.limits %}
 	{% include "rater/render_field.html" with field=form.deductible %}
@@ -76,12 +84,12 @@
 
 	{% if form.number_ft_employees.errors or form.number_pt_employees.errors %}
 	<div class="alert alert-danger" role="alert">
-		<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-		<span class="sr-only">Error:</span>
 		{{ form.number_ft_employees.errors|safe }}
 		{{ form.number_pt_employees.errors|safe }}
+		<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+		<span class="sr-only">Error:</span>
 	{% else %}
-	<div class="row">
+	<div>
 	{% endif %}
 		<label class="col-md-12">Number of Employees:</label>
 		<div class="col-md-4">{{ form.number_ft_employees }} Full Times</div>

@@ -4,6 +4,8 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
+from localflavor.us.forms import USStateSelect
+
 
 
 from .apps import module_id
@@ -45,7 +47,7 @@ def validate_gt_0(value):
 class DivErrorList(ErrorList):
 	def as_divs(self):
 		if not self: return ''
-		return '<div class="errorlist"><strong>%s</strong></div>' % ''.join(['<div class="error">%s</div>' % e for e in self])
+		return '<div class="errorlist">%s</div>' % ''.join(['<div class="error">%s</div>' % e for e in self])
 		#return '<strong>%s</strong>' % ''.join(['<div class="error">%s</div>' % e for e in self])
 
 	def __unicode__(self):
@@ -97,6 +99,7 @@ class IndicationsForm(forms.ModelForm):
 
 		# lables
 		self.fields['named'].label = _('Named Insured')
+		self.fields['dba'].label = _('Insured DBA')
 		self.fields['tzipcode'].label = _('Risk Location Zipcode')
 		self.fields['limits'].label = _('Limits')
 		self.fields['deductible'].label = _('Deductible (per occurence)')
@@ -145,12 +148,14 @@ class IndicationsForm(forms.ModelForm):
 		# error_messages
 		self.fields['named'].error_messages = {'required': _('Please enter the '
 															'Insured\'s name')}
-		self.fields['tzipcode'].error_messages = {'required': _('You need to '
-			'provide the zipcode of the risk location')}
+		# use dict.update, otherwise you are removing the error messages already defined
+		self.fields['tzipcode'].error_messages.update({'required': _('You need to '
+			'provide the zipcode of the risk location')})
 
 		# validators
 
 		# widgets
+		self.fields['state'].widget = USStateSelect()
 		self.fields['service_repair'].widget = forms.RadioSelect(choices=BOOL_CHOICES)
 		self.fields['prior_works_buyback'].widget = forms.RadioSelect(
 			choices=((True, _('Yes, Remove the "Prior Completed Operations '
